@@ -34,7 +34,7 @@ class CPVTON(object):
         self.gmm = GMM(opt, use_cuda=use_cuda)
         load_checkpoint(self.gmm, gmm_path, use_cuda=use_cuda)
         self.gmm.eval()
-        self.tom = UnetGenerator(23, 4, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
+        self.tom = UnetGenerator(26, 4, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
         load_checkpoint(self.tom, tom_path, use_cuda=use_cuda)
         self.tom.eval()
         if use_cuda:
