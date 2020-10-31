@@ -29,8 +29,9 @@ class CPVTON(object):
         '''
         init pretrained models
         '''
+        self.get_opt()
         self.use_cuda = use_cuda
-        self.gmm = GMM(use_cuda=use_cuda)
+        self.gmm = GMM(opt, use_cuda=use_cuda)
         load_checkpoint(self.gmm, gmm_path, use_cuda=use_cuda)
         self.gmm.eval()
         self.tom = UnetGenerator(23, 4, 6, ngf=64, norm_layer=nn.InstanceNorm2d)
@@ -101,3 +102,11 @@ class CPVTON(object):
             p_tryon = c_warp * m_composite + p_rendered * (1 - m_composite)
 
         return (p_tryon, c_warp)
+
+    def get_opt(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--fine_width", type=int, default=192)
+        parser.add_argument("--fine_height", type=int, default=256)
+        parser.add_argument("--grid_size", type=int, default=5)
+        opt = parser.parse_args()
+        return opt

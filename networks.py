@@ -503,6 +503,7 @@ def save_checkpoint(model, save_path, use_cuda=True):
 def load_checkpoint(model, checkpoint_path, use_cuda=True):
     if not os.path.exists(checkpoint_path):
         return "failed in loading checkpoint!"
-    model.load_state_dict(torch.load(checkpoint_path))
+    device = torch.device('gpu') if use_cuda else torch.device('cpu')
+    model.load_state_dict(torch.load(checkpoint_path, map_location=device)
     if use_cuda:
         model.cuda()
