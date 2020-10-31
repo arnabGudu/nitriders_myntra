@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import time
 import cv2 as cv
 from Model import Model
-
-%matplotlib inline
+import argparse
 
 def get_opt():
     parser = argparse.ArgumentParser()

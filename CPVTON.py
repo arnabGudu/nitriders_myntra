@@ -29,7 +29,7 @@ class CPVTON(object):
         '''
         init pretrained models
         '''
-        self.get_opt()
+        opt = self.get_opt()
         self.use_cuda = use_cuda
         self.gmm = GMM(opt, use_cuda=use_cuda)
         load_checkpoint(self.gmm, gmm_path, use_cuda=use_cuda)
