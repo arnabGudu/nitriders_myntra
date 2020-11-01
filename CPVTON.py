@@ -1,8 +1,4 @@
 # coding=utf-8
-'''
-This file implements CP-VTON.
-'''
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -26,9 +22,6 @@ transformer = transforms.Compose([
 class CPVTON(object):
 
     def __init__(self, gmm_path, tom_path, use_cuda=True):
-        '''
-        init pretrained models
-        '''
         opt = self.get_opt()
         self.use_cuda = use_cuda
         self.gmm = GMM(opt, use_cuda=use_cuda)
@@ -43,9 +36,6 @@ class CPVTON(object):
         print("use_cuda = "+str(self.use_cuda))
 
     def predict(self, parse_array, pose_map, human, c):
-        '''
-        input 4 np array with the shape of (*,256,192)
-        '''
         im = transformer(human)
         c = transformer(c)  # [-1,1]
 

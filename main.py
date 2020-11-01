@@ -1,7 +1,3 @@
-'''
-This file implements the web server on flask.
-It can provide web service, response all predict requests.
-'''
 import os
 from flask import Flask, render_template, request, url_for, send_from_directory
 from PIL import Image
@@ -16,7 +12,6 @@ import base64
 from datetime import datetime
 import json
 
-# Use base64 to send & receive images between clients and the server
 def readb64(base64_string):
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(base64_string))
@@ -33,8 +28,6 @@ def writeb64(img):
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-# init for all global variables
-
 model = Model("checkpoints/jpp.pb",
               "checkpoints/gmm.pth",
               "checkpoints/tom.pth",
@@ -42,10 +35,8 @@ model = Model("checkpoints/jpp.pb",
 
 app = Flask(__name__)
 
-# UPLOAD_FOLDER = 'request_upload'
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-# cloth list for web server
 cloth_list_raw = os.listdir(os.path.join(BASE_DIR, "static", "img"))
 cloth_list = []
 counter = 0
@@ -54,8 +45,6 @@ for cloth in cloth_list_raw:
         cloth_list.append([os.path.join("static", "img", cloth), counter])
         counter += 1
 
-
-# Use "/web" url to get web page
 @app.route('/web')
 def hello_world():
     return render_template('login.html', img_list=cloth_list)
@@ -68,7 +57,7 @@ def upload_image():
     if (not len(request.files) == 2 or (len(request.form) == 1 and len(request.files) == 1)):
         return render_template('login.html', info="selection error", img_list=cloth_list)
     else:
-        index = 0  # init
+        index = 0
         cloth_image = None
         if len(request.form) == 1:
             index = int(request.form['optionsRadios'][6:])
@@ -80,16 +69,13 @@ def upload_image():
         o_name, h_name = run_model_web(
             person_image, cloth_list[index][0].split("\\")[-1], cloth_image)
         end_time = time.time()
-        if o_name is None: # bad cloth image
+        if o_name is None:
             return 'I told you only clothes image with shape 256*192*3'
         else:
             return render_template('login.html', img_list=cloth_list, result1=h_name, result2=o_name, info="time: %.3f" % (end_time-start_time))
 
 
 def run_model_web(f, cloth_name, cloth_f=None):
-    '''
-    prediction service. cloth_name and cloth_f cannot be both None. cloth_f is prior, which is from user upload.
-    '''
     if cloth_f is None:
         print(f, cloth_name)
         c_img = np.array(Image.open(cloth_name))
@@ -100,7 +86,6 @@ def run_model_web(f, cloth_name, cloth_f=None):
         except:
             c_img = np.array(Image.open(cloth_name))
 
-    # local resource temp file would be used as static resource.
     temp_o_name = os.path.join("static", "result", "%d_%s" % (
         int(time.time()), cloth_name.split("/")[-1]))
     temp_h_name = os.path.join("static", "human", "%d_%s" % (
@@ -117,7 +102,7 @@ def run_model_web(f, cloth_name, cloth_f=None):
     out = np.array(out, dtype='uint8')
 
     img.save(temp_h_name)
-    Image.fromarray(out).save(temp_o_name, quality=95)  # 注意这个95
+    Image.fromarray(out).save(temp_o_name, quality=95)
     return temp_o_name, temp_h_name
 
 
@@ -135,31 +120,12 @@ def getimg():
     return [img_person, img_cloth]
 
 
-'''
-json format example:
-client:
-    {
-        'image_person':'...',
-        'image_cloth':'...'
-    }
-
-server:
-    {
-        'status':'ok',
-        'output_image':'...'
-    }
-'''
 @app.route('/cloth', methods=['GET', 'POST'])
 def Hello_cloth():
-    '''
-    响应客户端请求
-    reponse requests from clients
-    '''
     output_str = ""
     output_json = {}
     status = 'ok'
     if request.method == 'POST':
-        # temp file would be writed to root dir
         input_person, input_cloth = getimg()
         cv2.imwrite('in.jpg', input_person)
         input_person = input_person[60:580, 45:435]
@@ -169,7 +135,7 @@ def Hello_cloth():
         cv2.imwrite('out.jpg', output_img)
         print("v:"+str(v))
         output_base64 = writeb64(output_img)
-        if v < 0.1: # confidence is too weak to show
+        if v < 0.1:
             status = 'failure'
         else:
             status = 'ok'
@@ -183,9 +149,4 @@ def Hello_cloth():
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-
-    # run server locally
     app.run()
-
-    # or as a servers
-    # app.run(host='0.0.0.0', port=5000)

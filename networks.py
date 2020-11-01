@@ -4,9 +4,7 @@ import torch.nn as nn
 from torch.nn import init
 from torchvision import models
 import os
-
 import numpy as np
-
 
 def weights_init_normal(m):
     classname = m.__class__.__name__
@@ -287,12 +285,6 @@ class TpsGridGen(nn.Module):
 
         return torch.cat((points_X_prime, points_Y_prime), 3)
 
-# Defines the Unet generator.
-# |num_downs|: number of downsamplings in UNet. For example,
-# if |num_downs| == 7, image of size 128x128 will become of size 1x1
-# at the bottleneck
-
-
 class UnetGenerator(nn.Module):
     def __init__(self, input_nc, output_nc, num_downs, ngf=64,
                  norm_layer=nn.BatchNorm2d, use_dropout=False):
@@ -311,10 +303,6 @@ class UnetGenerator(nn.Module):
     def forward(self, input):
         return self.model(input)
 
-
-# Defines the submodule with skip connection.
-# X -------------------identity---------------------- X
-#   |-- downsampling -- |submodule| -- upsampling --|
 class UnetSkipConnectionBlock(nn.Module):
     def __init__(self, outer_nc, inner_nc, input_nc=None, submodule=None, outermost=False,
                  innermost=False, norm_layer=nn.BatchNorm2d, use_dropout=False):
@@ -361,7 +349,6 @@ class UnetSkipConnectionBlock(nn.Module):
         else:
             return torch.cat([x, self.model(x)], 1)
 
-
 class Vgg19(nn.Module):
     def __init__(self, requires_grad=False):
         super(Vgg19, self).__init__()
@@ -394,7 +381,6 @@ class Vgg19(nn.Module):
         out = [h_relu1, h_relu2, h_relu3, h_relu4, h_relu5]
         return out
 
-
 class VGGLoss(nn.Module):
     def __init__(self, layids=None, use_cuda=True):
         super(VGGLoss, self).__init__()
@@ -414,7 +400,6 @@ class VGGLoss(nn.Module):
             loss += self.weights[i] * self.criterion(x_vgg[i], y_vgg[i].detach())
         return loss
 
-
 class DT(nn.Module):
     def __init__(self):
         super(DT, self).__init__()
@@ -423,7 +408,6 @@ class DT(nn.Module):
         dt = torch.abs(x1 - x2)
         return dt
 
-
 class DT2(nn.Module):
     def __init__(self):
         super(DT, self).__init__()
@@ -431,7 +415,6 @@ class DT2(nn.Module):
     def forward(self, x1, y1, x2, y2):
         dt = torch.sqrt(torch.mul(x1 - x2, x1 - x2) + torch.mul(y1 - y2, y1 - y2))
         return dt
-
 
 class GicLoss(nn.Module):
     def __init__(self, opt):
@@ -463,9 +446,6 @@ class GicLoss(nn.Module):
 
 
 class GMM(nn.Module):
-    """ Geometric Matching Module
-    """
-
     def __init__(self, opt, use_cuda=True):
         super(GMM, self).__init__()
         self.extractionA = FeatureExtraction(22, ngf=64, n_layers=3, norm_layer=nn.BatchNorm2d)
@@ -490,7 +470,6 @@ class GMM(nn.Module):
         grid = self.gridGen(theta)
         return grid, theta
 
-
 def save_checkpoint(model, save_path, use_cuda=True):
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path))
@@ -498,7 +477,6 @@ def save_checkpoint(model, save_path, use_cuda=True):
     torch.save(model.cpu().state_dict(), save_path)
     if use_cuda:
         model.cuda()
-
 
 def load_checkpoint(model, checkpoint_path, use_cuda=True):
     if not os.path.exists(checkpoint_path):
