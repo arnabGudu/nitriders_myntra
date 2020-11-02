@@ -1,0 +1,29 @@
+/* .landing-page-container{
+    height: calc(100vh - 72px);
+    display: flex;
+    justify-content:center;
+    align-items:center;
+    text-align: center;
+    flex-direction:column;
+    overflow-x: hidden;
+}
+ */
+
+ .landing-page-container{
+    width: 100vw;
+    height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+ }
+
+ .landing-page-container .product-btn{
+     margin-top: 2rem;
+ }
+
+ .landing-page-container > h1{
+     font-size:1.5rem
+ }
